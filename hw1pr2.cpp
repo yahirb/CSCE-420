@@ -1,112 +1,86 @@
-// C++ program to search if a target node is reachable from
-// a source with given max depth.
-#include <string>
-#include <list>
-#include <iostream>
-#include <tuple>
 #include <fstream>
+#include <string>
 #include <vector>
-#include <sstream>
+#include <math.h>
+#include <stdio.h>
+#include <iostream>
+#include <list>
+#include <queue>
+
 using namespace std;
 
-// Graph class represents a directed graph using adjacency
-// list representation.
-class Graph
-{
-    int V;    // No. of vertices
+struct Node{
+  bool visited;
+  int x;
+  int y;
 
-    // Pointer to an array containing
-    // adjacency lists
-    list<int> *adj;
-
-    // A function used by IDDFS
-    bool DLS(int v, int target, int limit);
-
-public:
-    Graph(int V);   // Constructor
-    void addEdge(int v, int w);
-
-    // IDDFS traversal of the vertices reachable from v
-    bool IDDFS(int v, int target, int max_depth);
+  Node(int x0, int y0)
+  {
+    visited = false;
+    x = x0;
+    y = y0;
+  }
+  Node& operator[] (int x) {
+          return a[x];
+      }
 };
 
-Graph::Graph(int V)
+class Graph{
+    private:
+        int V;
+        list<Node> *adj;
+    public:
+        Graph(int V)
+        {
+            this->V = V;
+            adj = new list<Node>[V];
+        }
+        void addEdge(Node v, Node w);
+        void BFS(Node s, bool visited[]);
+
+};
+
+void Graph::addEdge(Node v, Node w)
 {
-    this->V = V;
-    adj = new list<int>[V];
+    adj[v].push_back(w);
+    adj[w].push_back(v);
 }
 
-void Graph::addEdge(int v, int w)
+/*
+ *  A recursive function to print BFS starting from s
+ */
+void Graph::BFS(Node s, bool visited[])
 {
-    adj[v].push_back(w); // Add w to v’s list.
+    list<Node> q;
+    list<Node>::iterator i;
+    visited[s] = true;
+    q.push_back(s);
+    while (!q.empty())
+    {
+        s = q.front();
+        q.pop_front();
+        for(i = adj[s].begin(); i != adj[s].end(); ++i)
+        {
+            if(!visited[*i])
+            {
+                visited[*i] = true;
+                q.push_back(*i);
+            }
+        }
+    }
 }
 
-// A function to perform a Depth-Limited search
-// from given source 'src'
-bool Graph::DLS(int src, int target, int limit)
-{
-    if (src == target)
-        return true;
-
-    // If reached the maximum depth, stop recursing.
-    if (limit <= 0)
-        return false;
-
-    // Recur for all the vertices adjacent to source vertex
-    for (auto i = adj[src].begin(); i != adj[src].end(); ++i)
-       if (DLS(*i, target, limit-1) == true)
-          return true;
-
-     return false;
-}
-
-// IDDFS to search if target is reachable from v.
-// It uses recursive DFSUtil().
-bool Graph::IDDFS(int src, int target, int max_depth)
-{
-    // Repeatedly depth-limit search till the
-    // maximum depth.
-    for (int i = 0; i <= max_depth; i++)
-       if (DLS(src, target, i) == true)
-          return true;
-
-    return false;
-}
-
-// Driver code
 int main(int argc, char const *argv[]) {
-
-  ifstream ifs( "hw1pr2_data.txt" );
-  string temp;
-  vector<tuple<int,int>> points;
-
-  while(getline(ifs, temp )){
-    int a, b;
-    stringstream ss(temp);
-    ss >> a >> b;
-    points.push_back(make_tuple(a,b));
+  ifstream f;
+  f.open("hw1pr1_data.txt");
+  vector<Node> Nodes;
+  int x;
+  int y;
+  while(f >> x >> y){
+      Node n =  Node(x,y);
+      Nodes.push_back(n);
   }
 
 
-
-    // Let us create a Directed graph with 7 nodes
-    Graph g(7);
-    g.addEdge(0, 1);
-    g.addEdge(0, 2);
-    g.addEdge(1, 3);
-    g.addEdge(1, 4);
-    g.addEdge(2, 5);
-    g.addEdge(2, 6);
-
-    int target = 6, maxDepth = 3, src = 0;
-    if (g.IDDFS(src, target, maxDepth) == true){
-        cout << "Target is reachable from source "
-                "within max depth";
-    }
-    else
-    {
-        cout << "Target is NOT reachable from source "
-                "within max depth";
-    }
-    return 0;
+  return 0;
 }
